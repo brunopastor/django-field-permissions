@@ -22,7 +22,7 @@ Finally, if you really freaky, you can declare instead a class-level dictionary 
 Grab a copy of the code from the repository:
 
 ```shell
-pip install git+https://github.com/tiliv/django-field-permissions#egg=field_permissions
+pip install git+https://github.com/souzaluuk/django-field-permissions#egg=field_permissions
 ```
 
 Add it to your ``settings.INSTALLED_APPS`` and tell Django about our object-level permission auth backend:
