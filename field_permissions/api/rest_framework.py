@@ -32,7 +32,7 @@ class FieldPermissionSerializerMixin:
             has_view = user.has_perm(
                 f'{app_label}.can_view_{model_name}_{name}')
             if in_fields and permission_exists and not has_view:
-                self.fields.remove(name)
+                self.fields.pop(name)
                 continue
 
             has_change = user.has_perm(
