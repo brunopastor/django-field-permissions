@@ -17,7 +17,7 @@ class FieldPermissionSerializerMixin:
         super(FieldPermissionSerializerMixin, self).__init__(*args, **kwargs)
 
         request = self.context.get('request', None)
-        user = request.user if request else AnonymousUser()
+        user = request.user if hasattr(request, 'user') else AnonymousUser()
         model = self.Meta.model
         model_name = model._meta.model_name
         app_label = model._meta.app_label
@@ -26,26 +26,19 @@ class FieldPermissionSerializerMixin:
         model_field_names = [f.name for f in model._meta.get_fields()]
         for name in model_field_names:
             in_fields = name in self.fields
-            has_perm = user.has_perm(
-                f'{app_label}.can_change_{model_name}_{name}'
-            )
-
-            if in_fields and not has_perm:
-                self.fields[name].read_only = True
-
-        for name in model_field_names:
-            in_fields = name in self.fields
             permission_exists = Permission.objects.filter(
                 codename=f'can_view_{model_name}_{name}'
             ).exists()
-            has_perm = user.has_perm(
-                f'{app_label}.can_view_{model_name}_{name}'
-            ) or user.has_perm(
-                f'{app_label}.can_change_{model_name}_{name}'
-            )
+            has_view = user.has_perm(
+                f'{app_label}.can_view_{model_name}_{name}')
+            if in_fields and permission_exists and not has_view:
+                self.fields.remove(name)
+                continue
 
-            if in_fields and permission_exists and not has_perm:
-                self.fields.pop(name)
+            has_change = user.has_perm(
+                f'{app_label}.can_change_{model_name}_{name}')
+            if in_fields and not has_change:
+                self.fields[name].read_only = True
 
 
 class FieldPermissionSerializer(FieldPermissionSerializerMixin, serializers.ModelSerializer):
