@@ -35,9 +35,12 @@ class FieldPermissionSerializerMixin:
                 self.fields.pop(name)
                 continue
 
+            permission_exists = Permission.objects.filter(
+                codename=f'can_change_{model_name}_{name}'
+            ).exists()
             has_change = user.has_perm(
                 f'{app_label}.can_change_{model_name}_{name}')
-            if in_fields and not has_change:
+            if in_fields and permission_exists and not has_change:
                 self.fields[name].read_only = True
 
 
